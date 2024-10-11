@@ -57,7 +57,20 @@ resource "azurerm_network_security_group" "nsg" {
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_range     = "22"
+    destination_port_ranges    = ["22", "80", "443"]
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  # Allow Jenkins traffic
+  security_rule {
+    name                       = "allow-jenkins"
+    priority                   = 200
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_ranges    = ["8080"]
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
@@ -94,5 +107,39 @@ resource "azurerm_linux_virtual_machine" "vm" {
     offer     = "UbuntuServer"
     sku       = "18.04-LTS"
     version   = "latest"
+  }
+
+  connection {
+    host     = self.public_ip_address
+    user     = self.admin_username
+    password = self.admin_password
+    type     = "ssh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo apt-get update",
+      "sudo apt-get install -y curl",
+
+      "sudo apt-get install docker.io -y",
+      "sudo gpasswd -a $USER docker",
+
+      "sudo apt-get install -y fontconfig openjdk-17-jre",
+      "java -version",
+
+      "sudo wget http://ftp.kr.debian.org/debian/pool/main/i/init-system-helpers/init-system-helpers_1.60_all.deb",
+      "sudo apt install ./init-system-helpers_1.60_all.deb",
+
+      "sudo wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key",
+      "echo \"deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]\" https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null",
+      "sudo apt-get update",
+      "sudo apt-get install jenkins",
+      "sudo systemctl start jenkins",
+      "sudo systemctl enable jenkins",
+      "sudo systemctl status jenkins",
+      "sudo ufw allow 8080",
+      "sudo ufw reload",
+      "sudo ufw status",
+    ]
   }
 }
