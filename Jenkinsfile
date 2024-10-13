@@ -32,7 +32,9 @@ pipeline {
                 // Login to Azure Container Registry
                 script {
                     def dockerCreds = credentials('azure-acr-creds') // Use the ID from Jenkins credentials
-                    sh "docker login ${DOCKER_REGISTRY} --username ${dockerCreds.username} --password ${dockerCreds.password}"
+                    echo "Username: ${dockerCreds.username}"
+                    echo "Logging into Docker with credentials..."
+                    sh "echo ${dockerCreds.password} | docker login ${DOCKER_REGISTRY} --username ${dockerCreds.username} --password-stdin <<< ${dockerCreds.password}"
                 }
 
                 // Push Docker image to ACR
@@ -46,7 +48,7 @@ pipeline {
                 // Login to Azure Container Registry
                 script {
                     def dockerCreds = credentials('azure-acr-creds') // Use Jenkins credentials ID for ACR login
-                    sh "docker login ${DOCKER_REGISTRY} --username ${dockerCreds.username} --password ${dockerCreds.password}"
+                    sh "echo ${dockerCreds.password} | docker login ${DOCKER_REGISTRY} --username ${dockerCreds.username} --password-stdin <<< ${dockerCreds.password}"
                 }
 
                 // Pull Docker image from ACR
@@ -59,7 +61,7 @@ pipeline {
                 script {
                     // Login to Azure Container Registry
                     def dockerCreds = credentials('azure-acr-creds') // Use Jenkins credentials ID for ACR login
-                    sh "docker login ${DOCKER_REGISTRY} --username ${dockerCreds.username} --password ${dockerCreds.password}"
+                    sh "echo ${dockerCreds.password} | docker login ${DOCKER_REGISTRY} --username ${dockerCreds.username} --password-stdin <<< ${dockerCreds.password}"
 
                     // Stop and remove any existing container with the same name
                     sh """
