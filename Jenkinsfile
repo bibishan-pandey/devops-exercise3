@@ -32,7 +32,7 @@ pipeline {
                 // Login to Azure Container Registry
                 script {
                     def dockerCreds = credentials('azure-acr-creds') // Use the ID from Jenkins credentials
-                    sh "echo ${dockerCreds.password} | docker login ${DOCKER_REGISTRY} --username ${dockerCreds.username} --password-stdin"
+                    sh "docker login ${DOCKER_REGISTRY} --username ${dockerCreds.username} --password ${dockerCreds.password}"
                 }
 
                 // Push Docker image to ACR
@@ -46,7 +46,7 @@ pipeline {
                 // Login to Azure Container Registry
                 script {
                     def dockerCreds = credentials('azure-acr-creds') // Use Jenkins credentials ID for ACR login
-                    sh "echo ${dockerCreds.password} | docker login ${DOCKER_REGISTRY} --username ${dockerCreds.username} --password-stdin"
+                    sh "docker login ${DOCKER_REGISTRY} --username ${dockerCreds.username} --password ${dockerCreds.password}"
                 }
 
                 // Pull Docker image from ACR
@@ -57,6 +57,10 @@ pipeline {
         stage('Deploy Docker Container') {
             steps {
                 script {
+                    // Login to Azure Container Registry
+                    def dockerCreds = credentials('azure-acr-creds') // Use Jenkins credentials ID for ACR login
+                    sh "docker login ${DOCKER_REGISTRY} --username ${dockerCreds.username} --password ${dockerCreds.password}"
+
                     // Stop and remove any existing container with the same name
                     sh """
                     docker stop nextjs-demo-container || true
