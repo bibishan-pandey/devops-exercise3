@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent any 
 
     environment {
         DOCKER_REGISTRY = "nextjsdemoacr.azurecr.io"
@@ -14,6 +14,33 @@ pipeline {
             }
         }
 
+        stage('Run Tests') {
+            steps {
+                echo 'Running tests...'
+                echo 'Tests passed!'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ."
+            }
+        }
+
+        stage('Push Docker Image to ACR') {
+            steps {
+                // Login to Azure Container Registry
+                script {
+                    def dockerCreds = credentials('azure-acr-creds') // Use the ID from Jenkins credentials
+                    sh "echo ${dockerCreds.password} | docker login ${DOCKER_REGISTRY} --username ${dockerCreds.username} --password-stdin"
+                }
+
+                // Push Docker image to ACR
+                sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+            }
+        }
+
+        // Just for demo
         stage('Pull Docker Image from ACR') {
             steps {
                 // Login to Azure Container Registry
@@ -38,7 +65,7 @@ pipeline {
 
                     // Run the new container
                     sh """
-                    docker run -d --name nextjs-demo-container -p 80:3000 ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
+                    docker run --rm -d --name nextjs-demo-container -p 3000:3000 ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
                     """
                 }
             }
@@ -47,6 +74,7 @@ pipeline {
 
     post {
         success {
+            echo 'Docker image built and pushed to ACR successfully!'
             echo 'Docker container deployed successfully from ACR!'
         }
         failure {

@@ -7,7 +7,7 @@ RUN corepack enable
 
 # Install dependencies separately for production and development
 COPY ./package.json ./yarn.lock ./
-RUN yarn install
+RUN yarn install --frozen-lockfile
 
 # Build stage
 FROM base AS builder
