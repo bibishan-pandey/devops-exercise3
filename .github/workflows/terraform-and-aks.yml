@@ -50,6 +50,9 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
             - name: Login to Azure Container Registry
               uses: azure/docker-login@v1
               with:
