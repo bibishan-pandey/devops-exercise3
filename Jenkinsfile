@@ -2,8 +2,8 @@ pipeline {
     agent any 
 
     environment {
-        DOCKER_REGISTRY = "nextjsdemoacr.azurecr.io"
-        DOCKER_IMAGE_NAME = "nextjs-demo-image"
+        DOCKER_REGISTRY = "myfastapiacr.azurecr.io"
+        DOCKER_IMAGE_NAME = "fastapi-image"
         DOCKER_IMAGE_TAG = "latest"
     }
 
@@ -84,13 +84,13 @@ pipeline {
                         
                         // Stop and remove any existing container with the same name
                         sh """
-                        docker stop nextjs-demo-container || true
-                        docker rm nextjs-demo-container || true
+                        docker stop fastapi-container || true
+                        docker rm fastapi-container || true
                         """
 
                         // Run the new container
                         sh """
-                        docker run --rm -d --name nextjs-demo-container -p 3000:3000 ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
+                        docker run --rm -d --name fastapi-container -p 3000:3000 ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
                         """
                     }
 

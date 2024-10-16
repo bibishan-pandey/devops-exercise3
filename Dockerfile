@@ -1,42 +1,25 @@
-# Base stage to install dependencies
-FROM node:18-alpine AS base
+# Base image with Python 3.10.8
+FROM python:3.10.8-slim AS base
+
+# Set the working directory inside the container
 WORKDIR /app
 
-# Enable corepack
-RUN corepack enable
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies separately for production and development
-COPY ./package.json ./yarn.lock ./
-RUN yarn install --frozen-lockfile
+# Copy the requirements file to install dependencies
+COPY ./requirements.txt /app/requirements.txt
 
-# Build stage
-FROM base AS builder
-WORKDIR /app
-COPY --chown=node:node . .
-RUN yarn build
+# Install the Python dependencies
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
-# Final stage for production
-FROM node:18-alpine AS production
-WORKDIR /app
+# Copy the FastAPI app code
+COPY . /app
 
-# Set environment variables
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
+# Expose the port that FastAPI will run on (default is 8000)
+EXPOSE 8000
 
-# Copy only the production dependencies from the base image
-COPY --from=base /app/node_modules ./node_modules
-
-# Copy the build artifacts and necessary config files from the builder
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/next.config.mjs ./next.config.mjs
-
-# Set appropriate user and expose port
-USER node
-EXPOSE 3000
-
-# Use volume for caching
-VOLUME /home/node/.next/cache
-
-# Start the application
-CMD ["yarn", "start"]
+# Command to run FastAPI
+CMD ["fastapi", "run"]

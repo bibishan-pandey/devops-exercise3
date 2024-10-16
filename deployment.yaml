@@ -1,0 +1,33 @@
+# Kubernetes YAML Files
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: fastapi-deployment
+    labels:
+        app: fastapi
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: fastapi
+    template:
+        metadata:
+            labels:
+                app: fastapi
+        spec:
+            automountServiceAccountToken: false
+            containers:
+                - name: fastapi-container
+                  image: myfastapiacr.azurecr.io/fastapi-image:latest
+                  ports:
+                      - containerPort: 3000
+                  resources:
+                      limits:
+                          memory: "512Mi"
+                          cpu: "500m"
+                          ephemeral-storage: "1Gi"
+                      requests:
+                          memory: "256Mi"
+                          cpu: "250m"
+                          ephemeral-storage: "500Mi"

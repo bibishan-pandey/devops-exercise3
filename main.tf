@@ -1,12 +1,21 @@
 # Resource Group
 resource "azurerm_resource_group" "rg" {
-  name     = "nextjs-demo-rg"
+  name     = "fastapi-rg"
   location = "Canada Central"
+}
+
+# Azure Container Registry (ACR)
+resource "azurerm_container_registry" "acr" {
+  name                = "myfastapiacr"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  sku                 = "Basic"
+  admin_enabled       = true
 }
 
 # Virtual Network
 resource "azurerm_virtual_network" "vnet" {
-  name                = "nextjs-demo-vnet"
+  name                = "fastapi-vnet"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   address_space       = ["10.0.0.0/16"]
@@ -14,7 +23,7 @@ resource "azurerm_virtual_network" "vnet" {
 
 # Subnet
 resource "azurerm_subnet" "subnet" {
-  name                 = "nextjs-demo-subnet"
+  name                 = "fastapi-subnet"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.2.0/24"]
@@ -22,7 +31,7 @@ resource "azurerm_subnet" "subnet" {
 
 # Public IP
 resource "azurerm_public_ip" "public_ip" {
-  name                    = "nextjs-demo-public-ip"
+  name                    = "fastapi-public-ip"
   resource_group_name     = azurerm_resource_group.rg.name
   location                = azurerm_resource_group.rg.location
   allocation_method       = "Dynamic"
@@ -31,7 +40,7 @@ resource "azurerm_public_ip" "public_ip" {
 
 # Network Interface
 resource "azurerm_network_interface" "nic" {
-  name                = "nextjs-demo-nic"
+  name                = "fastapi-nic"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
@@ -45,7 +54,7 @@ resource "azurerm_network_interface" "nic" {
 
 # Network Security Group
 resource "azurerm_network_security_group" "nsg" {
-  name                = "nextjs-demo-nsg"
+  name                = "fastapi-nsg"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
 
@@ -84,7 +93,7 @@ resource "azurerm_network_interface_security_group_association" "nic_nsg_associa
 
 # Virtual Machine
 resource "azurerm_linux_virtual_machine" "vm" {
-  name                = "nextjs-demo-vm"
+  name                = "fastapi-vm"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   size                = "Standard_B1s"
@@ -136,10 +145,6 @@ resource "azurerm_linux_virtual_machine" "vm" {
       "sudo apt-get install jenkins",
       "sudo systemctl start jenkins",
       "sudo systemctl enable jenkins",
-      "sudo systemctl status jenkins",
-      "sudo ufw allow 8080",
-      "sudo ufw reload",
-      "sudo ufw status",
 
       "sudo usermod -aG docker jenkins",
       "sudo systemctl restart jenkins",
@@ -147,3 +152,37 @@ resource "azurerm_linux_virtual_machine" "vm" {
     ]
   }
 }
+
+# Azure Kubernetes Service (AKS)
+# resource "azurerm_kubernetes_cluster" "aks" {
+#   name                = "fastapi-aks"
+#   location            = azurerm_resource_group.rg.location
+#   resource_group_name = azurerm_resource_group.rg.name
+#   dns_prefix          = "fastapi"
+
+#   default_node_pool {
+#     name       = "default"
+#     node_count = 1
+#     vm_size    = "Standard_D2_v2"
+#   }
+
+#   identity {
+#     type = "SystemAssigned"
+#   }
+
+#   network_profile {
+#     network_plugin = "azure"
+#   }
+
+#   role_based_access_control_enabled = true
+
+#   kubernetes_version = "1.25.5"
+# }
+
+# # Granting ACR permissions to AKS
+# resource "azurerm_role_assignment" "aks_acr" {
+#   principal_id         = azurerm_kubernetes_cluster.aks.identity[0].principal_id
+#   role_definition_name = "AcrPull"
+#   scope                = azurerm_container_registry.acr.id
+# }
+
