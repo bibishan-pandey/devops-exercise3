@@ -60,4 +60,4 @@ jobs:
             - name: Run kubectl to apply latest deployment
               run: |
                   az aks get-credentials --resource-group fastapi-rg --name fastapi-aks
-                  kubectl set image deployment/fastapi fastapi=${{ secrets.AZURE_ACR_LOGIN_SERVER }}/fastapi:latest
+                  kubectl set image deployment/fastapi fastapi=${{ secrets.AZURE_ACR_LOGIN_SERVER }}/fastapi-image:latest

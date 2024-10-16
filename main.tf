@@ -96,6 +96,19 @@ resource "azurerm_network_security_group" "nsg" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
+
+  # Allow Elasticsearch traffic
+  security_rule {
+    name                       = "allow-elasticsearch"
+    priority                   = 1000
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "9200" # Expose Elasticsearch port
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
 }
 
 # Network Security Group Association
@@ -162,11 +175,19 @@ resource "azurerm_linux_virtual_machine" "vm" {
       "sudo usermod -aG docker jenkins",
       "sudo systemctl restart jenkins",
       "sudo systemctl restart docker",
+
+      # Install Elasticsearch using apt
+      "wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -",                                          # Add the Elasticsearch GPG key
+      "echo \"deb https://artifacts.elastic.co/packages/8.x/apt/ stable main\" | sudo tee /etc/apt/sources.list.d/elastic-8.x.list", # Add the Elasticsearch repository
+      "sudo apt-get update",
+      "sudo apt-get install -y elasticsearch", # Install Elasticsearch
+      "sudo systemctl start elasticsearch",    # Start Elasticsearch service
+      "sudo systemctl enable elasticsearch"    # Enable Elasticsearch to start on boot
     ]
   }
 }
 
-# Azure Kubernetes Service (AKS)
+# # Azure Kubernetes Service (AKS)
 # resource "azurerm_kubernetes_cluster" "aks" {
 #   name                = "fastapi-aks"
 #   location            = azurerm_resource_group.rg.location
@@ -176,7 +197,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
 #   default_node_pool {
 #     name       = "default"
 #     node_count = 1
-#     vm_size    = "Standard_D2_v2"
+#     vm_size    = "Standard_B2s"
 #   }
 
 #   identity {
