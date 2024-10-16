@@ -21,7 +21,7 @@ spec:
                 - name: fastapi-container
                   image: myfastapiacr.azurecr.io/fastapi-image:latest
                   ports:
-                      - containerPort: 3000
+                      - containerPort: 8000
                   resources:
                       limits:
                           memory: "512Mi"

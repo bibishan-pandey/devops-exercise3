@@ -90,7 +90,7 @@ pipeline {
 
                         // Run the new container
                         sh """
-                        docker run --rm -d --name fastapi-container -p 3000:3000 ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
+                        docker run --rm -d --name fastapi-container -p 8000:8000 ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
                         """
                     }
 
