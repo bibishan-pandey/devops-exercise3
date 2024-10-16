@@ -22,6 +22,13 @@ jobs:
               with:
                   terraform_version: 1.5.0
 
+            - name: Login to Azure Container Registry
+              uses: azure/docker-login@v1
+              with:
+                  login-server: ${{ secrets.AZURE_ACR_LOGIN_SERVER }}
+                  username: ${{ secrets.AZURE_ACR_USERNAME }}
+                  password: ${{ secrets.AZURE_ACR_PASSWORD }}
+
             - name: Terraform Init
               run: terraform init
 
