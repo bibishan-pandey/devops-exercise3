@@ -175,14 +175,6 @@ resource "azurerm_linux_virtual_machine" "vm" {
       "sudo usermod -aG docker jenkins",
       "sudo systemctl restart jenkins",
       "sudo systemctl restart docker",
-
-      # Install Elasticsearch using apt
-      "wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -",                                          # Add the Elasticsearch GPG key
-      "echo \"deb https://artifacts.elastic.co/packages/8.x/apt/ stable main\" | sudo tee /etc/apt/sources.list.d/elastic-8.x.list", # Add the Elasticsearch repository
-      "sudo apt-get update",
-      "sudo apt-get install -y elasticsearch", # Install Elasticsearch
-      "sudo systemctl start elasticsearch",    # Start Elasticsearch service
-      "sudo systemctl enable elasticsearch"    # Enable Elasticsearch to start on boot
     ]
   }
 }
