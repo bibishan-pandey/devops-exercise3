@@ -20,6 +20,7 @@ spec:
             containers:
                 - name: fastapi-container
                   image: myfastapiacr.azurecr.io/fastapi-image:latest
+                  imagePullPolicy: Always
                   ports:
                       - containerPort: 8000
                   resources:

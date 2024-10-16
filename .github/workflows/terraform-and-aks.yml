@@ -84,6 +84,11 @@ jobs:
             - name: Setup kubectl
               uses: azure/setup-kubectl@v3
 
+            - name: Run kubectl to apply latest deployment
+              run: |
+                  az aks get-credentials --resource-group fastapi-rg --name fastapi-aks
+                  kubectl set image deployment/fastapi fastapi=${{ secrets.AZURE_ACR_LOGIN_SERVER }}/fastapi-image:latest
+
             - name: Deploy to Kubernetes
               uses: Azure/k8s-deploy@v4
               with:
@@ -92,8 +97,3 @@ jobs:
                       deployment.yaml
                       service.yaml
                   images: ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/fastapi-image:latest
-
-            # - name: Run kubectl to apply latest deployment
-            #   run: |
-            #       az aks get-credentials --resource-group fastapi-rg --name fastapi-aks
-            #       kubectl set image deployment/fastapi fastapi=${{ secrets.AZURE_ACR_LOGIN_SERVER }}/fastapi-image:latest
