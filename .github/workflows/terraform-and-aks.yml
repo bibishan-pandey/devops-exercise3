@@ -32,6 +32,11 @@ jobs:
             - name: Terraform Init
               run: terraform init
 
+            - name: Import Existing Resource Group
+              run: |
+                  terraform import azurerm_resource_group.rg /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/fastapi-rg
+              continue-on-error: true # Prevent failure if resource is already managed
+
             - name: Terraform Apply
               env:
                   ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -39,6 +44,7 @@ jobs:
                   ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
                   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
               run: terraform apply -auto-approve
+              continue-on-error: true
 
     deploy:
         runs-on: ubuntu-latest

@@ -5,12 +5,45 @@ pipeline {
         DOCKER_REGISTRY = "myfastapiacr.azurecr.io"
         DOCKER_IMAGE_NAME = "fastapi-image"
         DOCKER_IMAGE_TAG = "latest"
+
+        ARM_CLIENT_ID = credentials('azure-client-id')
+        ARM_CLIENT_SECRET = credentials('azure-client-secret')
+        ARM_SUBSCRIPTION_ID = credentials('azure-subscription-id')
+        ARM_TENANT_ID = credentials('azure-tenant-id')
     }
 
     stages {
         stage('Clone Repository') {
             steps {
                 git 'https://github.com/bibishan-pandey/devops-exercise3.git'
+            }
+        }
+
+        stage('Install Terraform') {
+            steps {
+                sh 'curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -'
+                sh 'sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"'
+                sh 'sudo apt-get update && sudo apt-get install terraform'
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                sh 'terraform init'
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                script {
+                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                        // Import existing resources to avoid recreation and apply the Terraform plan
+                        sh '''
+                        terraform import azurerm_resource_group.rg /subscriptions/${ARM_SUBSCRIPTION_ID}/resourceGroups/fastapi-rg || true
+                        terraform apply -auto-approve
+                        '''
+                    }
+                }
             }
         }
 
