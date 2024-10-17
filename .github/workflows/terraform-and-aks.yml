@@ -53,13 +53,6 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v2
 
-            - name: Login to Azure Container Registry
-              uses: azure/docker-login@v1
-              with:
-                  login-server: ${{ secrets.AZURE_ACR_LOGIN_SERVER }}
-                  username: ${{ secrets.AZURE_ACR_USERNAME }}
-                  password: ${{ secrets.AZURE_ACR_PASSWORD }}
-
             - name: Login to Azure
               uses: azure/login@v2
               with:
@@ -87,7 +80,11 @@ jobs:
             - name: Run kubectl to apply latest deployment
               run: |
                   az aks get-credentials --resource-group fastapi-rg --name fastapi-aks
-                  kubectl set image deployment/fastapi fastapi=${{ secrets.AZURE_ACR_LOGIN_SERVER }}/fastapi-image:latest
+                  kubectl set image fastapi-deployment fastapi=${{ secrets.AZURE_ACR_LOGIN_SERVER }}/fastapi-image:latest
+
+            - name: Restart Kubernetes Deployment
+              run: |
+                  kubectl rollout restart fastapi-deployment
 
             - name: Deploy to Kubernetes
               uses: Azure/k8s-deploy@v4
