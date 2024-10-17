@@ -80,11 +80,11 @@ jobs:
             - name: Run kubectl to apply latest deployment
               run: |
                   az aks get-credentials --resource-group fastapi-rg --name fastapi-aks
-                  kubectl set image fastapi-deployment fastapi=${{ secrets.AZURE_ACR_LOGIN_SERVER }}/fastapi-image:latest
+                  kubectl set image deployment/fastapi-deployment fastapi-container=${{ secrets.AZURE_ACR_LOGIN_SERVER }}/fastapi-image:latest
 
             - name: Restart Kubernetes Deployment
               run: |
-                  kubectl rollout restart fastapi-deployment
+                  kubectl rollout restart deployment/fastapi-deployment
 
             - name: Deploy to Kubernetes
               uses: Azure/k8s-deploy@v4
