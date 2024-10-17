@@ -32,3 +32,78 @@ spec:
                           memory: "256Mi"
                           cpu: "250m"
                           ephemeral-storage: "500Mi"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: elasticsearch-deployment
+    labels:
+        app: elasticsearch
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: elasticsearch
+    template:
+        metadata:
+            labels:
+                app: elasticsearch
+        spec:
+            automountServiceAccountToken: false
+            containers:
+                - name: elasticsearch-container
+                  image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+                  imagePullPolicy: Always
+                  ports:
+                      - containerPort: 9200
+                      - containerPort: 9300
+                  env:
+                      - name: discovery.type
+                        value: "single-node"
+                  resources:
+                      limits:
+                          memory: "2Gi"
+                          cpu: "1000m"
+                          ephemeral-storage: "2Gi"
+                      requests:
+                          memory: "1Gi"
+                          cpu: "500m"
+                          ephemeral-storage: "1Gi"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: kibana-deployment
+    labels:
+        app: kibana
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: kibana
+    template:
+        metadata:
+            labels:
+                app: kibana
+        spec:
+            automountServiceAccountToken: false
+            containers:
+                - name: kibana-container
+                  image: docker.elastic.co/kibana/kibana:8.10.2
+                  imagePullPolicy: Always
+                  ports:
+                      - containerPort: 5601
+                  env:
+                      - name: ELASTICSEARCH_HOSTS
+                        value: "http://elasticsearch-service:9200"
+                  resources:
+                      limits:
+                          memory: "1Gi"
+                          cpu: "500m"
+                          ephemeral-storage: "1Gi"
+                      requests:
+                          memory: "512Mi"
+                          cpu: "250m"
+                          ephemeral-storage: "500Mi"

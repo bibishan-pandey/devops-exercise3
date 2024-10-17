@@ -9,3 +9,29 @@ spec:
           targetPort: 8000
     selector:
         app: fastapi
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: elasticsearch-service
+spec:
+    selector:
+        app: elasticsearch
+    ports:
+        - protocol: TCP
+          port: 9200
+          targetPort: 9200
+    type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: kibana-service
+spec:
+    selector:
+        app: kibana
+    ports:
+        - protocol: TCP
+          port: 5601
+          targetPort: 5601
+    type: LoadBalancer
